@@ -1,0 +1,391 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model BeSpoke.Models.ProductViewModel
+<link href="~/Content/datatables.min.css" rel="stylesheet" />
+<link href="~/Content/bootstrap-dialog.min.css" rel="stylesheet" />
+<link href="~/Content/bootstrap-select.min.css" rel="stylesheet" />
+<link href="~/Content/datepicker.css" rel="stylesheet" />
+<div class="app-panel">
+    <div class="app-panel-header">
+        <h2 class="app-panel-header-title">Products<a data-toggle="modal" data-target="#addProductModal" class="btn btn-primary pull-right">Add Product</a></h2>
+    </div>
+    <div class="app-panel-content" style="overflow:hidden">
+        <div id="product-table-container">
+            <table id="product-table" style="width:100%" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Manufacturer</th>
+                        <th>Style</th>
+                        <th>Purchase Price</th>
+                        <th>Sale Price</th>
+                        <th>Qty On Hand</th>
+                        <th>Commission Percentage</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+<div id="modals-section">
+    <div id="addProductModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add Product</h4>
+                </div>
+                <div class="modal-body" style="min-height:150px;overflow-y: auto;">
+                    <input class="hidden" v-model="Product.ProductId" />
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Product Name</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="Product.ProductName" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Manufacturer</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="Product.Manufacturer" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Style</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="Product.Style" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Purchase Price</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="Product.PurchasePrice" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Sale Price</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="Product.SalePrice" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Quantity On Hand</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="Product.QtyOnHand" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Commission Percentage</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="Product.CommissionPercentage" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button v-on:click="AddOrUpdateProduct()" class="btn btn-primary">Add/Update</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="product-sale-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Purchase Product</h4>
+                </div>
+                <div class="modal-body" style="min-height:150px;overflow-y: auto;">
+                    <input class="hidden" v-model="Product.ProductId" />
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Product</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" readonly v-model="ProductDetails" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Salesperson</label>
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control" v-model="SelectedSalesPersonId" v-on:change="UpdateDatePicker()">
+                                <option v-for="salesPerson in SalesPersons" v-bind:value="salesPerson.SalesPersonId">
+                                    {{ salesPerson.LastName }}, {{ salesPerson.FirstName }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Existing Customers</label>
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control" v-model="SelectedCustomer">
+                                <option v-for="customer in ExistingCustomers" v-bind:value="customer">
+                                    {{ customer.LastName }}, {{ customer.FirstName }}; {{ customer.StreetAddress }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">First Name</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="SelectedCustomer.FirstName" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Last Name</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="SelectedCustomer.LastName" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Street Address</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="SelectedCustomer.StreetAddress" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">City</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="SelectedCustomer.City" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">State</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="SelectedCustomer.State" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Zip Code</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="SelectedCustomer.ZipCode" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Date of Sale</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control calendar" id="SaleDate" v-model="SaleDate" />
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-4">
+                            <label class="control-label">Quantity</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control" v-model="QtySold" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button v-on:click="PurchaseProduct()" class="btn btn-primary">Purchase</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script src="~/Scripts/bootstrap-dialog.js"></script>
+    @Scripts.Render("~/Scripts/app-utilities.js")
+    @Scripts.Render("~/Scripts/datatables.min.js")
+    @Scripts.Render("~/Scripts/bootstrap-datepicker.js")
+    <script src="~/Scripts/bootstrap-select.min.js"></script>
+    <script src="~/Scripts/vue/vue.js"></script>
+    <script src="~/Scripts/vue/vue-directives.js"></script>
+    <script>
+
+    $('#product-table').DataTable({
+        searching: false,
+        ordering: true,
+        order: [
+            [1, "desc"]
+        ],
+        searching: false,
+        processing: true,
+        stateSave: true,
+        fixedHeader: true,
+        info: false,
+        scrollY: 350,
+        scrollX: true,
+        deferRender: true,
+        scroller: true,
+        scrollCollapse: false,
+        ajax: {
+            url: '/Products/ProductList',
+            type: 'GET'
+        },
+        columns: [
+            {
+                data: 'ProductName', name: 'Product Name'
+            },
+            {
+                data: 'Manufacturer'
+            },
+            {
+                data: 'Style'
+            },
+            {
+                data: 'PurchasePrice', name: 'Purchase Price',
+                render: function (data, type, row, meta) {
+                    return '$' + data;
+                }
+            },
+            {
+                data: 'SalePrice', name: 'Sale Price',
+                render: function (data, type, row, meta) {
+                    return '$' + data;
+                }
+            },
+            {
+                data: 'QtyOnHand', name: "Qty On Hand"
+            },
+            {
+                data: 'CommissionPercentage', name: "Comission Percentage",
+                render: function (data, type, row, meta) {
+                    return data * 100 + '%';
+                }
+            },
+            {
+                data: 'ProductId', name: "Actions", orderable: false,
+                render: function (data, type, row, meta) {
+                    var html = '<a class="purchase-product"><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span></a>';
+                    html += '<a class="edit-product" style="margin-left:8px;"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>';
+                    return html;
+                }
+            }
+        ]
+    });
+
+    var vm = new Vue({
+        el: "#modals-section",
+        data: {
+            Product: {
+                ProductId: 0
+            },
+            ExistingCustomers: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Customers)),
+            SalesPersons: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SalesPersons)),
+            SelectedCustomer: {
+                CustomerId: 0
+            }
+        },
+        methods: {
+            AddOrUpdateProduct: function () {
+                self = this;
+                $.ajax({
+                    url: "/Products/AddOrUpdateProduct",
+                    type: "POST",
+                    contentType: 'application/json; charset-UTF-8',
+                    traditional: true,
+                    data: JSON.stringify({ product: self.Product }),
+                    success: function (data) {
+                        if (data == true) {
+                            $('#addProductModal').modal('hide');
+                            $('#product-table').DataTable().ajax.reload();
+                            showAlert("Product saved.", "success");
+                            self.Product = {
+                                ProductId: 0
+                            };
+                        } else {
+                            $('#addProductModal').modal('hide');
+                            showAlert("Error adding product", "warning");
+                        }
+                    },
+                    error: function () {
+                        showAlert("Error adding product", "warning");
+                    }
+                });
+            },
+            PurchaseProduct: function () {
+                self = this;
+                var data = {
+                    Product: self.Product,
+                    Customer: self.SelectedCustomer,
+                    SaleDate: self.SaleDate,
+                    SalesPersonId: self.SelectedSalesPersonId,
+                    QtySold: self.QtySold
+                };
+                $.ajax({
+                    url: "/Sales/CompleteSale",
+                    type: "POST",
+                    contentType: 'application/json; charset-UTF-8',
+                    traditional: true,
+                    data: JSON.stringify({ model: data }),
+                    success: function (data) {
+                        if (data == true) {
+                            $('#product-sale-modal').modal('hide');
+                            $('#product-table').DataTable().ajax.reload();
+                            showAlert("Sale Completed", "success");
+                            self.Product = {
+                                ProductId: 0
+                            };
+                        } else {
+                            $('#product-sale-modal').modal('hide');
+                            showAlert("Error completing sale", "warning");
+                        }
+                    },
+                    error: function () {
+                        showAlert("Error completing sale", "warning");
+                    }
+                });
+            }
+        },
+        computed: {
+            ProductDetails: function (){
+                return [this.Product.ProductName, this.Product.Manufacturer, this.Product.Style].join(";");
+            }
+        }
+    });
+    $(document).ready(function () {
+        $('#product-table-container').on('click', '.edit-product', function () {
+            var tr = $(this).closest('tr');
+            var record = $('#product-table').DataTable().row(tr).data();
+            vm.Product = record;
+            $('#addProductModal').modal('show');
+        });
+        $('#product-table-container').on('click', '.purchase-product', function () {
+            var tr = $(this).closest('tr');
+            var record = $('#product-table').DataTable().row(tr).data();
+            vm.Product = record;
+            vm.QtySold = 1;
+            $('#product-sale-modal').modal('show');
+        });
+    });
+
+    </script>
+}

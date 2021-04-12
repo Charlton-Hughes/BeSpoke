@@ -1,0 +1,7 @@
+﻿insert into dbo.Customer(FirstName,LastName,StreetAddress,City,[State],[ZipCode],StartDate)
+values('David','Charney','3343 Collingham Trce','Marietta','GA',30068,'2021-04-01')
+,('James','Choi', '3933 Whistle Train Rd', 'Brea', 'CA','90210','2001-05-01')
+,('Christine','Choi', '3933 Whistle Train Rd', 'Brea', 'CA','90210','2011-01-01')
+,('Oscar','Lopez', '6150 Freedom Ave', 'Sykesville', 'MD','21784','2014-04-01')
+,('Matt','Urinak', '14 St. Stephens Street', 'Boston', 'MA','02234','2002-09-01')
+,('Peter','Layon', '14 Peachtree Rd', 'Peachtree City', 'GA','30098','2012-09-01')

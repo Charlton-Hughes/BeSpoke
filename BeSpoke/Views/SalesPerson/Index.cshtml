@@ -1,0 +1,241 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/Content/datatables.min.css" rel="stylesheet" />
+<link href="~/Content/bootstrap-dialog.min.css" rel="stylesheet" />
+<link href="~/Content/datepicker.css" rel="stylesheet" />
+<div class="app-panel">
+    <div class="app-panel-header">
+        <h2 class="app-panel-header-title">Salespersons<a data-toggle="modal" data-target="#sales-person-modal" class="btn btn-primary pull-right">Add Sales Person</a></h2>
+    </div>
+    <div class="app-panel-content" style="overflow:hidden">
+        <div id="sales-person-table-container">
+            <table id="sales-persons-table" style="width:100%" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Street Address</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Zip</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Manager</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="sales-person-modal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add/Update Salesperson</h4>
+            </div>
+            <div class="modal-body" style="min-height:150px;overflow-y: auto;">
+                <input class="hidden" v-model="SalesPerson.SalesPersonId" />
+                <div class="form-group col-md-12">
+                    <div class="col-md-4">
+                        <label class="control-label">First Name</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" v-model="SalesPerson.FirstName" />
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="col-md-4">
+                        <label class="control-label">Last Name</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" v-model="SalesPerson.LastName" />
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="col-md-4">
+                        <label class="control-label">Street Address</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" v-model="SalesPerson.StreetAddress" />
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="col-md-4">
+                        <label class="control-label">City</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" v-model="SalesPerson.City" />
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="col-md-4">
+                        <label class="control-label">State</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" v-model="SalesPerson.State" />
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="col-md-4">
+                        <label class="control-label">Zip Code</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" v-model="SalesPerson.ZipCode" />
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="col-md-4">
+                        <label class="control-label">Start Date</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" v-model="SalesPerson.StartDate" />
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="col-md-4">
+                        <label class="control-label">End Date</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" v-model="SalesPerson.TerminationDate" />
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="col-md-4">
+                        <label class="control-label">Manager</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" v-model="SalesPerson.Manager" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button v-on:click="AddOrUpdateSalesPerson()" class="btn btn-primary">Add/Update</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+    @Scripts.Render("~/Scripts/app-utilities.js")
+    @Scripts.Render("~/Scripts/datatables.min.js")
+    <script src="~/Scripts/vue/vue.js"></script>
+    <script src="~/Scripts/bootstrap-dialog.js"></script>
+    @Scripts.Render("~/Scripts/bootstrap-datepicker.js")
+    <script>
+        $('#sales-persons-table').DataTable({
+            searching: false,
+            ordering: true,
+            order: [
+                [1, "desc"]
+            ],
+            searching: false,
+            processing: true,
+            stateSave: true,
+            fixedHeader: true,
+            info: false,
+            scrollY: 350,
+            scrollX: true,
+            deferRender: true,
+            scroller: true,
+            scrollCollapse: false,
+            ajax: {
+                url: '/SalesPerson/SalesPersonList',
+                type: 'GET'
+            },
+            columns: [
+                {
+                    data: 'FirstName', name: 'First Name'
+                },
+                {
+                    data: 'LastName', name: 'Last Name'
+                },
+                {
+                    data: 'StreetAddress', name: 'Street Address'
+                },
+                {
+                    data: 'City'
+                },
+                {
+                    data: 'State'
+                },
+                {
+                    data: 'ZipCode', name: "Zip"
+                },
+                {
+                    data: 'StartDate', name: "Start Date",
+                    render: function (data, type, row, meta) {
+                        return row.StartDateString;
+                    }
+                },
+                {
+                    data: 'TerminationDate', name: "End Date",
+                    render: function (data, type, row, meta) {
+                        return row.TerminationDateString;
+                    }
+                },
+                {
+                    data: 'Manager', name: "Manager"
+                },
+                {
+                    data: 'SalesPersonId', name: "Edit", orderable: false,
+                    render: function (data, type, row, meta) {
+                        return '<a class="edit-sales-person"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>';
+                    }
+                }
+            ]
+        });
+        var vm = new Vue({
+            el: "#sales-person-modal",
+            data: {
+                SalesPerson: {
+                    SalesPersonId: 0
+                }
+            },
+            methods: {
+                AddOrUpdateSalesPerson: function () {
+                    debugger;
+                    self = this;
+                    $.ajax({
+                        url: "/SalesPerson/AddOrUpdateSalesPerson",
+                        type: "POST",
+                        contentType: 'application/json; charset-UTF-8',
+                        traditional: true,
+                        data: JSON.stringify({ salesPerson: self.SalesPerson }),
+                        success: function (data) {
+                            if (data == true) {
+                                $('#sales-person-modal').modal('hide');
+                                $('#sales-persons-table').DataTable().ajax.reload();
+                                showAlert("Salesperson Saved", "success");
+                                self.Product = {
+                                    ProductId: 0
+                                };
+                            } else {
+                                $('#sales-person-modal').modal('hide');
+                                showAlert("Error adding or updating salesperson.", "warning");
+                            }
+                        },
+                        error: function () {
+                            showAlert("Error adding or updating salesperson.", "warning");
+                        }
+                    });
+                },
+            }
+        });
+        $(document).ready(function () {
+            $('#sales-person-table-container').on('click', '.edit-sales-person', function () {
+                var tr = $(this).closest('tr');
+                var record = $('#sales-persons-table').DataTable().row(tr).data();
+                vm.SalesPerson = record;
+                vm.SalesPerson.StartDate = record.StartDateString;
+                vm.SalesPerson.TerminationDate = record.TerminationDateString;
+                $('#sales-person-modal').modal('show');
+            });
+        });
+    </script>
+}

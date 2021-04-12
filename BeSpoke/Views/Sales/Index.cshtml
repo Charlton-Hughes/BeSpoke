@@ -1,0 +1,125 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/Content/datatables.min.css" rel="stylesheet" />
+<link href="~/Content/datepicker.css" rel="stylesheet" />
+<div class="app-panel">
+    <div class="app-panel-header" style="margin-top:10px;">
+        <div class="col-md-8">
+            <h2 class="app-panel-header-title">
+                Sales
+            </h2>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group date-group">
+                <label for="dateRange">Date Range</label>
+                <div class="input-group">
+                    <input id="startDate" name="startDate" type="text" style="cursor: pointer;" data-provide="datepicker" class="form-control calendar" />
+                    <span class="input-group-addon">to</span>
+                    <input id="endDate" name="endDate" type="text" style="cursor: pointer;" data-provide="datepicker" class="form-control calendar" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="app-panel-content col-md-12" style="overflow:hidden;padding:0;">
+        <div>
+            <table id="sales-table" style="width:100%" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Salesperson</th>
+                        <th>Customer</th>
+                        <th>Price</th>
+                        <th>Commission</th>
+                        <th>Date</th>
+                        @*<th>Edit</th>*@
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@section scripts { @* this will render after standard scripts, like Bootstrap and jQuery *@
+@Scripts.Render("~/Scripts/app-utilities.js")
+@Scripts.Render("~/Scripts/datatables.min.js")
+@Scripts.Render("~/Scripts/bootstrap-datepicker.js")
+<script>
+    $('#sales-table').DataTable({
+        searching: false,
+        ordering: true,
+        order: [
+            [1, "desc"]
+        ],
+        searching: false,
+        processing: true,
+        stateSave: true,
+        fixedHeader: true,
+        info: false,
+        scrollY: 350,
+        scrollX: true,
+        deferRender: true,
+        scroller: true,
+        scrollCollapse: false,
+        ajax: {
+            url: '/Sales/SalesList',
+            type: 'GET',
+            data: function (d) {
+                d.startDate = $('#startDate').val();
+                d.endDate = $('#endDate').val();
+            },
+        },
+        columns: [
+            {
+                data: 'Product.ProductName', name: 'Product'
+            },
+            {
+                data: 'SalesPerson.SalesPersonName', name: 'Salesperson'
+            },
+            {
+                data: 'Customer.CustomerName', name: 'Customer'
+            },
+            {
+                data: 'Product.SalePrice', name: 'Price',
+                render: function (data, type, row, meta) {
+                    return moneyFormat(data);
+                }
+            },
+            {
+                data: 'Product.SalePrice', name: 'Commission',
+                render: function (data, type, row, meta) {
+                    debugger;
+                    if (!(row.Discount)) {
+                        return moneyFormat(row.Product.SalePrice * row.Product.CommissionPercentage);
+                    } 
+                    var discountBeginDate = new Date(row.Discount.BeginDateString);
+                    var discountEndDate = new Date(row.Discount.EndDateString);
+                    var saleDate = new Date(row.Sale.SaleDateString);
+                    var discount = (row.Discount && row.Discount.DiscountPercentage && saleDate <= discountEndDate && saleDate >= discountBeginDate)
+                        ? row.Discount.DiscountPercentage : 0;
+                    var payPercentage = 1 - discount;
+                    return moneyFormat(row.Product.SalePrice * row.Product.CommissionPercentage * payPercentage);
+                }
+            },
+            {
+                data: 'Sale.Date', name: "Date",
+                render: function (data, type, row, meta) {
+                    return row.Sale.SaleDateString;
+                }
+            },
+            //{
+            //    data: 'SaleId', name: "Edit", orderable: false,
+            //    render: function (data, type, row, meta) {
+            //        return '<a><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a>';
+            //    }
+            //}
+        ]
+    });
+
+    $('#startDate, #endDate').on('change', function (ev) {
+        $('#sales-table').DataTable().ajax.reload();
+    });
+
+</script>
+}

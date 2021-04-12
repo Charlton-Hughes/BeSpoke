@@ -1,0 +1,99 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model List<int>
+<link href="~/Content/datatables.min.css" rel="stylesheet" />
+<div class="app-panel">
+    <div class="app-panel-header">
+        <h2 class="app-panel-header-title">Quarterly Commission
+            <span class="pull-right">
+                <select id="year" class="form-control">
+                    @foreach (int year in Model)
+                    {
+                        <option value="@year">@year</option>
+                    }
+                </select>
+            </span>
+        </h2>
+    </div>
+    <div class="app-panel-content" style="overflow:hidden">
+        <div>
+            <table id="quarterly-commission-table" style="width:100%" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Salesperson</th>
+                        <th>Quarter 1</th>
+                        <th>Quarter 2</th>
+                        <th>Quarter 3</th>
+                        <th>Quarter 4</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@section scripts { @* this will render after standard scripts, like Bootstrap and jQuery *@
+@Scripts.Render("~/Scripts/app-utilities.js")
+@Scripts.Render("~/Scripts/datatables.min.js")
+<script>
+    $('#quarterly-commission-table').DataTable({
+        searching: false,
+        ordering: true,
+        order: [
+            [1, "desc"]
+        ],
+        searching: false,
+        processing: true,
+        stateSave: true,
+        fixedHeader: true,
+        info: false,
+        scrollY: 350,
+        scrollX: true,
+        deferRender: true,
+        scroller: true,
+        scrollCollapse: false,
+        ajax: {
+            url: '/Sales/QuarterlyCommissionList',
+            type: 'GET',
+            data: function (d) {
+                d.year = $('#year').val();
+            },
+        },
+        columns: [
+            {
+                data: 'SalesPerson', name: 'Salesperson',
+
+            },
+            {
+                data: 'Q1Commission', name: 'Quarter 1',
+                render: function (data, type, row, meta) {
+                    return moneyFormat(data);
+                }
+            },
+            {
+                data: 'Q2Commission', name: 'Quarter 2',
+                render: function (data, type, row, meta) {
+                    return moneyFormat(data);
+                }
+            },
+            {
+                data: 'Q3Commission', name: 'Quarter 3',
+                render: function (data, type, row, meta) {
+                    return moneyFormat(data);
+                }
+            },
+            {
+                data: 'Q4Commission', name: 'Quarter 4',
+                render: function (data, type, row, meta) {
+                    return moneyFormat(data);
+                }
+            },
+        ]
+    });
+    $('#year').on('change', function () {
+        $('#quarterly-commission-table').DataTable().ajax.reload();
+    });
+</script>
+}
